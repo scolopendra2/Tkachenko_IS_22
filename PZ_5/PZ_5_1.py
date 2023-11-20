@@ -3,17 +3,29 @@
 полученных линий."""
 
 
+def vert_line(k):
+    return '|   ' + ' ' * k + '   |\n'
+
+
+def vert_line_with_word(word):
+    return '|   ' + word + '   |\n'
+
+
+def goriz_line(k):
+    return '____' + '_' * k + '____\n'
+
+
 def create_ramka(word):
     k = len(word)
-    return ('____' + '_' * k + '____\n' +
-            '|   ' + ' ' * k + '   |\n' +
-            '|   ' + ' ' * k + '   |\n' +
-            '|   ' + ' ' * k + '   |\n' +
-            '|   ' + word + '   |\n' +
-            '|   ' + ' ' * k + '   |\n' +
-            '|   ' + ' ' * k + '   |\n' +
-            '|   ' + ' ' * k + '   |\n' +
-            '|___' + '_' * k + '___|')
+    return (goriz_line(k) +
+            vert_line(k) +
+            vert_line(k) +
+            vert_line(k) +
+            vert_line_with_word(word) +
+            vert_line(k) +
+            vert_line(k) +
+            vert_line(k) +
+            goriz_line(k))
 
 
 def main():
