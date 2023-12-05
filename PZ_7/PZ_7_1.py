@@ -3,9 +3,9 @@
 
 
 def main():
-    s = 'Python one love'
+    s = 'Python love one love'
     s0 = 'love'
-    s = s.replace(s0, '')
+    s = s.replace(s0, '', 1)
     print(s)
 
 
