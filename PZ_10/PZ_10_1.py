@@ -7,22 +7,22 @@
 
 
 def main():
-    in_japan = []
-    not_uar = []
-    my_dict = {
-        'Вояж': {'Мексика', 'Канада', 'Израиль', 'Италия', 'США'},
-        'РейнаТур': {'Англия', 'Япония', 'Канада', 'ЮАР'},
-        'Радуга': {'США', 'Испания', 'Швеция', 'Австралия'}
-    }
-    for k, v in my_dict.items():
-        if 'Япония' in v:
-            in_japan.append(k)
-        if 'ЮАР' not in v:
-            not_uar.append(k)
-    all_tour = my_dict["Вояж"] | my_dict["РейнаТур"] | my_dict["Радуга"]
-    print(f'Туры в Японию можно приобрести в тур агенствах: {", ".join(in_japan)}')
-    print(f'Туры в ЮАР нельзя приобрести в тур агенствах: {", ".join(not_uar)}')
-    print(f'Полный список всех туров: {", ".join(list(map(lambda x: str(x), all_tour)))}')
+    tours_to_japan = 'Нет таких турагенств'
+    tours_to_south_africa = 'Нет таких турагенств'
+    voyage_tours = {"Мексика", "Канада", "Израиль", "Италия", "США"}
+    reina_tour = {"Англия", "Япония", "Канада", "ЮАР"}
+    raduga_tours = {"США", "Испания", "Швеция", "Австралия"}
+
+    if 'Япония' in reina_tour:
+        tours_to_japan = 'РейнаТур'
+    if 'ЮАР' not in voyage_tours and 'ЮАР' not in raduga_tours:
+        tours_to_south_africa = 'Вояж, Радуга'
+
+    all_tours = voyage_tours | reina_tour | raduga_tours
+
+    print("1. Туры в Японию можно приобрести в следующих турагентствах:", tours_to_japan)
+    print("2. Туры в ЮАР нельзя приобрести в следующих турагентствах:", tours_to_south_africa)
+    print("3. Полный список всех туров:", all_tours)
 
 
 if __name__ == '__main__':
