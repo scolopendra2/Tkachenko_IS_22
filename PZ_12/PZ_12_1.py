@@ -3,7 +3,7 @@
 
 
 def main():
-    n = [1, 3, 45, 67, 1223, 5, 6, 2]
+    n = [i for i in range(1, 11)]
     max_element = max(n)
     n = list(map(lambda x: x * max_element, n))
     print(n)

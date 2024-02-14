@@ -3,6 +3,8 @@
 
 def main():
     matrix = [[i for i in range(j, j + 5)] for j in range(1, 19, 5)]
+    print(matrix)
+    print()
     n = input('Введите строку матрицы:')
     while not n.isdigit():
         print('ERROR это не число')
