@@ -1,1 +1,1 @@
-print('Практоса нет на гитхабе')
+print((i*i for i in range(5))[1])
