@@ -2,10 +2,7 @@
 
 
 def main():
-    matrix = [[-1, -2, -3, -4, -5],
-              [-6, -7, -8, -9, -10],
-              [-11, -12, -13, -14],
-              [16, -17, -18, -19, -20]]
+    matrix = [[i for i in range(j, j + 5)] for j in range(1, 19, 5)]
     result_list = list(map(lambda x: any(list(map(lambda y: y > 0, x))), matrix))
     print(any(result_list))
 
