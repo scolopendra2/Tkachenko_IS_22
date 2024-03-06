@@ -4,6 +4,7 @@
 
 def main():
     n = [i for i in range(1, 11)]
+    print(n)
     max_element = max(n)
     n = list(map(lambda x: x * max_element, n))
     print(n)
