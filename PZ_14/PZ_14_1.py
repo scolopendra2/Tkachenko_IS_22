@@ -7,8 +7,9 @@ import re
 def main():
     with open('experience.txt', 'r', encoding='utf8') as file:
         data_file = file.readlines()[2:]
-    pattern = r"(\d+ (год|лет|года) \d+ месяц|\d+ (год|лет|года)|\d+ месяц)"
-    matches = re.findall(pattern, ''.join(data_file))
+    pattern = r"(\d+ (года|лет|год) \d+ месяц\w+|\d+ (года|лет|год)|\d+ месяц\w+)"
+    matches = list(map(lambda x: x[0], re.findall(pattern, ''.join(data_file))))
+    print(matches)
     print(f'Количество полученных элементов: {len(matches)}')
 
 

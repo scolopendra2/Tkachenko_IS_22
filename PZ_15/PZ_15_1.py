@@ -1,225 +1,89 @@
-""".Из заданной строки отобразить только символы пунктуации. Использовать
-библиотеку string.
-Строка: --msg-template="$FileDir$\{path}:{line}:{column}:{C}:({symbol}){msg}"
+"""Приложение ОПТОВАЯ БАЗА для автоматизированного контроля движения
+товаров на оптовой базе. Таблица Товары должна содержать следующие данные: Код
+товара, Наименование товара, Наименование магазина, Заявки магазина, Количество
+товара на складе, Единицы измерения, Оптовая цена.
 """
+import random
 import sqlite3
+
+product_names = ['Яблоко', 'Банан',
+                 'Груша', 'Мандарин', 'Апельсин', 'Малина',
+                 'Клубника', 'Помидор', 'Огурец', 'Баклажан']
+
+magaz_names = ['Яблоко', 'Банан',
+               'Груша', 'Мандарин', 'Апельсин', 'Малина',
+               'Клубника', 'Помидор', 'Огурец', 'Баклажан'][::-1]
+
+ed_izm = ['грамм (г)', 'килограмм (кг)', 'центнер (ц)', 'тонна (т)']
+
+
+def create_database(connect, cursor):
+    try:
+        cursor.execute("""CREATE TABLE IF NOT EXISTS products (
+                        id_p INTEGER PRIMARY KEY,
+                        name_product VARCHAR(50),
+                        name_magaz VARCHAR(200),
+                        zayavki_magaz INT,
+                        ostatok INT,
+                        ed_izm VARCHAR(20),
+                        cost INT);""")
+        connect.commit()
+    except sqlite3.Error as e:
+        print("Ошибка при создании таблицы:", e)
+
+
+def create_zap(connect, cursor):
+    for i in range(10):
+        cursor.execute(f"""INSERT INTO products (name_product, name_magaz, zayavki_magaz, ostatok, ed_izm, cost)
+         VALUES('{product_names[i]}',
+        '{magaz_names[i]}', {random.randint(0, 2000)}, {random.randint(0, 5000)},
+        '{random.choice(ed_izm)}', {random.randint(0, 200)})""")
+    connect.commit()
+
+
+def view_zap(cursor):
+    all_product = list(map(lambda x: x[0], cursor.execute("""SELECT DISTINCT name_product
+    FROM products;""").fetchall()))
+    all_magaz = list(map(lambda x: x[0], cursor.execute("""SELECT DISTINCT name_magaz
+    FROM products;""").fetchall()))
+    all_ed_izm = list(map(lambda x: x[0], cursor.execute("""SELECT DISTINCT ed_izm
+    FROM products;""").fetchall()))
+    print(all_product)
+    print(all_magaz)
+    print(all_ed_izm)
+
+
+def update(connect, cursor):
+    for _ in range(3):
+        random_id = random.randint(1, 11)
+        random_ed_izm = random.choice(ed_izm)
+        cursor.execute(f"""UPDATE products SET ed_izm='{random_ed_izm}' WHERE id_p={random_id}""")
+        print(f"У записи №{random_id} единицы измерения изменены на {random_ed_izm}")
+    connect.commit()
+
+
+def delete(connect, cursor):
+    random_magaz = random.choice(magaz_names)
+    random_product = random.choice(product_names)
+    random_ed = random.choice(ed_izm)
+    cursor.execute(f"""DELETE FROM products WHERE name_product='{random_product}'""")
+    cursor.execute(f"""DELETE FROM products WHERE name_magaz='{random_magaz}'""")
+    cursor.execute(f"""DELETE FROM products WHERE ed_izm='{random_ed}'""")
+    print(f'Удалён магазин {random_magaz}')
+    print(f'Удалён товар {random_product}')
+    print(f'Удалены товары с единицей измерения {random_ed}')
+    connect.commit()
 
 
 def main():
     connect = sqlite3.connect('base.db')
     cursor = connect.cursor()
+    create_database(connect, cursor)
+    create_zap(connect, cursor)
+    view_zap(cursor)
 
-    try:
-        cursor.execute("""CREATE TABLE Товары (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        название VARCHAR,
-                        описание VARCHAR,
-                        единица_измерения VARCHAR);""")
-    except sqlite3.Error as e:
-        print("Ошибка при создании таблицы:", e)
-
-    try:
-        cursor.execute("""CREATE TABLE Магазины (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        название VARCHAR,
-                        адрес VARCHAR,
-                        телефон VARCHAR);""")
-    except sqlite3.Error as e:
-        print("Ошибка при создании таблицы:", e)
-
-    try:
-        cursor.execute("""CREATE TABLE Заявки_магазинов (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        id_магазина INT,
-                        дата_заявки DATE,
-                        FOREIGN KEY (id_магазина) REFERENCES Магазины(id));""")
-    except sqlite3.Error as e:
-        print("Ошибка при создании таблицы:", e)
-
-    try:
-        cursor.execute("""CREATE TABLE Количество_товаров_на_складе (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        id_товара INT,
-                        количество INT,
-                        FOREIGN KEY (id_товара) REFERENCES Товары(id));""")
-    except sqlite3.Error as e:
-        print("Ошибка при создании таблицы:", e)
-
-    try:
-        cursor.execute("""CREATE TABLE Состав (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            id_заявки INT,
-                            id_товара INT,
-                            количество INT,
-                            FOREIGN KEY (id_товара) REFERENCES Товары(id),
-                            FOREIGN KEY (id_заявки) REFERENCES Заявки_магазинов(id));""")
-    except sqlite3.Error as e:
-        print("Ошибка при создании таблицы:", e)
-
-    result = cursor.execute("""SELECT название, описание FROM Товары""").fetchall()
-    print(result)
-    print()
-
-    result = cursor.execute("""SELECT название, адрес FROM Магазины""").fetchall()
-    print(result)
-    print()
-
-    result = cursor.execute("""SELECT Магазины.название, Заявки_магазинов.дата_заявки
-                                FROM Заявки_магазинов
-                                JOIN Магазины ON Заявки_магазинов.id_магазина = Магазины.id;
-                            """).fetchall()
-    print(result)
-    print()
-
-    result = cursor.execute("""SELECT Товары.название, Количество_товаров_на_складе.количество
-                                    FROM Количество_товаров_на_складе
-                                    JOIN Товары ON Количество_товаров_на_складе.id_товара = Товары.id
-                                    ORDER BY Количество_товаров_на_складе.количество DESC;
-                                """).fetchall()
-    print(result)
-    print()
-
-    result = cursor.execute("""SELECT Магазины.название, Товары.название
-                                        FROM Состав
-                                        JOIN Товары ON Состав.id_товара = Товары.id
-                                        JOIN Заявки_магазинов ON Состав.id_заявки = Заявки_магазинов.id
-                                        JOIN Магазины ON Заявки_магазинов.id_магазина = Магазины.id;
-                                    """).fetchall()
-    print(result)
-    print()
-
-    result = cursor.execute(f"""SELECT Товары.название
-                                FROM Товары
-                                JOIN Количество_товаров_на_складе
-                                ON Товары.id = Количество_товаров_на_складе.id_товара
-                                WHERE Количество_товаров_на_складе.количество < 
-                                {input('Минимальное допустимое количество товара:')};
-                                """).fetchall()
-    print(result)
-    print()
-
-    result = cursor.execute(f"""SELECT Заявки_магазинов.id, Магазины.название
-                                    FROM Заявки_магазинов
-                                    JOIN Магазины ON Заявки_магазинов.id_магазина = Магазины.id
-                                    WHERE Заявки_магазинов.дата_заявки == '{input('Введите дату заявки:')}';
-                                    """).fetchall()
-    print(result)
-    print()
-
-    result = cursor.execute(f"""SELECT Магазины.название
-                                FROM Магазины
-                                JOIN Заявки_магазинов ON Магазины.id = Заявки_магазинов.id_магазина
-                                JOIN Состав ON Заявки_магазинов.id = Состав.id_заявки
-                                JOIN Количество_товаров_на_складе ON Состав.id_товара = 
-                                Количество_товаров_на_складе.id_товара
-                                GROUP BY Магазины.название
-                                HAVING SUM(Количество_товаров_на_складе.количество) < 
-                                {input('Введите суммарное количесвто товаров на складе:')};
-                                        """).fetchall()
-    print(result)
-    print()
-
-    product = input('Введите название товара: ')
-    cursor.execute(f"""UPDATE Количество_товаров_на_складе
-                        SET количество = {input('Введите новое количество товаров: ')}
-                        WHERE id_товара IN (SELECT id FROM Товары WHERE название = '{product}');
-                    """)
-
-    id_z = input('Введите id заявки: ')
-    product_name = input('Введите имя товара: ')
-    new_product_name = input('Введите новое имя товара: ')
-    cursor.execute(f"""UPDATE Товары
-                    SET название = '{new_product_name}'
-                    WHERE id IN (SELECT id_товара FROM Состав
-                    WHERE id_заявки = {id_z}) AND название = '{product_name}'""")
-
-    id_z = input('Введите id заявки: ')
-    product_name = input('Введите имя товара: ')
-    kol_vo = input('Введите новое количество товара: ')
-    cursor.execute(f"""UPDATE Состав
-                        SET количество = '{kol_vo}'
-                        WHERE id_заявки = {id_z} AND id_товара IN
-                        (SELECT id FROM Товары WHERE название = '{product_name}')""")
-
-    id_z = input('Введите id заявки: ')
-    new_adress = input('Введите новый адрес магазина: ')
-    cursor.execute(f"""UPDATE Магазины
-                        SET адрес = '{new_adress}'
-                        WHERE id IN (SELECT id_магазина FROM Заявки_магазинов
-                    #WHERE id = {id_z})""")
-
-    id_z = input('Введите id заявки: ')
-    name_magaz = input('Введите название магазина: ')
-    new_date = input('Введите новую дату заявки: ')
-    cursor.execute(f"""UPDATE Заявки_магазинов
-                            SET дата_заявки = '{new_date}'
-                            WHERE id_магазина IN (SELECT id FROM Магазины
-                            WHERE название = '{name_magaz}') AND id = {id_z}""")
-
-    product_list = input('Введите id товара через ",": ')
-    new_kolvo = input('Введите новое количество товаров: ')
-    cursor.execute(f"""UPDATE Количество_товаров_на_складе
-                      SET количество = {new_kolvo}
-                      WHERE id_товара IN ({product_list})""")
-
-    """В SQLite нельзя выполнить одновременное обновление двух таблиц в одном SQL-запросе. 
-    Вам придется выполнить два отдельных запроса для обновления каждой таблицы."""
-    product = input('Введите название товара: ')
-    op = input('Введите новое описание товара: ')
-    new_kolvo = input('Введите новое количество товара: ')
-    cursor.execute(f"""UPDATE Товары
-                        SET описание = '{op}'
-                        WHERE название = '{product}'
-                    """)
-    cursor.execute(f"""UPDATE Количество_товаров_на_складе
-                        SET количество = {new_kolvo}
-                        WHERE id_товара IN (SELECT id FROM Товары
-                        WHERE название = '{product}');
-                        """)
-
-    id_z = input('Введите id заявки: ')
-    new_kolvo = input('Введите новое количество товара: ')
-    cursor.execute(f"""UPDATE Количество_товаров_на_складе
-                            SET количество = {new_kolvo}
-                            WHERE id_товара IN (SELECT id_товара FROM Состав
-                            WHERE id_заявки = {id_z});
-                            """)
-
-    id_z = input('Введите id заявки: ')
-    new_kolvo = input('Введите новое количество товара: ')
-    product_name = input('Введите название товара: ')
-    cursor.execute(f"""UPDATE Количество_товаров_на_складе
-                        SET количество = {new_kolvo}
-                        WHERE id_товара IN (SELECT id_товара FROM Состав
-                        WHERE id_заявки = {id_z}) AND id_товара IN
-                        (SELECT id FROM Товары WHERE название = '{product_name}');
-                        """)
-
-    id_z = input('Введите id заявки: ')
-    new_name = input('Введите новое название магазина: ')
-    new_adress = input('Введите новый адрес магазина: ')
-    cursor.execute(f"""UPDATE Магазины
-                        SET название = '{new_name}',
-                        адрес = '{new_adress}'
-                        WHERE id IN (SELECT id_магазина FROM Заявки_магазинов
-                        WHERE id = {id_z})""")
-
-    # 11. Обновить название магазина в заявке, которую подал конкретный магазин
-    # кривое задание у нас в заявке нет названия магазина, а название магазина напрямую изменятеся через
-    # таблицу магазины, тогда при чём строка про заявки???
-
-    # снова, название магазина я могу обновить через название товара, и айди заявки
-    # (я так понял заявки это таблица состав) но это не рационально ибо название обновляется напрямую
-    # запросом к таблице Магазины
-
-    product_name = input('Введите название товара: ')
-    new_kol_vo = input('Введите новое количество товара: ')
-    cursor.execute(f"""UPDATE Состав
-                            SET количество = '{new_kol_vo}'
-                            WHERE id_товара IN (SELECT id FROM Товары
-                            WHERE название = '{product_name}')""")
-
-    connect.commit()
+    # update(connect, cursor)
+    # delete(connect, cursor)
 
 
 if __name__ == '__main__':
